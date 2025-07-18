@@ -1,0 +1,5 @@
+**/__pycache__/
+resource/
+!resource/conlleval.pl
+dataset/hdsner*
+save/
