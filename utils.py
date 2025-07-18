@@ -163,8 +163,13 @@ class Procedure(object):
     def test(model, dataset, eval_path, dict_center, knn=False, theorhold=0 ,k=64):
         model.eval()
         time_start = time.time()
+        seqs, outputs, oracles = Procedure.predict(model, dataset, dict_center, knn=False, theorhold=0 ,k=64)
+        out_f1, out_precision, out_recall = f1_score(seqs, outputs, oracles, eval_path)
+        return out_f1, out_precision, out_recall, time.time() - time_start
+    
+    @staticmethod
+    def predict(model, dataset, dict_center, knn=False, theorhold=0 ,k=64):
         seqs, outputs, oracles = [], [], []
-
         for sentences, segments in tqdm(dataset, ncols=50):
             with torch.no_grad():
                 predictions = model.inference(sentences, dict_center, knn, theorhold, k)
@@ -172,6 +177,4 @@ class Procedure(object):
             seqs.extend(sentences)
             outputs.extend([iob_tagging(e, len(u)) for e, u in zip(predictions, sentences)])
             oracles.extend([iob_tagging(e, len(u)) for e, u in zip(segments, sentences)])
-
-        out_f1, out_precision, out_recall = f1_score(seqs, outputs, oracles, eval_path)
-        return out_f1, out_precision, out_recall, time.time() - time_start
+        return seqs, outputs, oracles

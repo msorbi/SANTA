@@ -109,4 +109,10 @@ if __name__ == "__main__":
         model = torch.load(checkpoint_path)
         test_f1, test_precision, test_recall, test_time = Procedure.test(model, test_loader, script_path, dict_center, args.knn, args.theorhold, args.k)
         print("f1 score on test set is {:.5f}, precision is {:.5f}, recall is {:.5f}, using {:.3f} secs".format(test_f1, test_precision, test_recall, test_time))
-
+        
+    for split, loader in [("dev", dev_loader), ("test", test_loader)]:
+        seqs, outputs, oracles = Procedure.predict(model, loader, dict_center, args.knn, args.theorhold, args.k)
+        iob = "\n\n".join("\n".join("\t".join(so) for so in zip(seq,output)) for seq,output in zip(seqs,outputs)) + "\n"
+        pred_path = os.path.join(args.check_dir, f"{split}_predictions.txt")
+        with open(pred_path, "w") as fp:
+            fp.write(iob)
